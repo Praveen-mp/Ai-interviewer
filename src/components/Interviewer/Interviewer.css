@@ -1,0 +1,19 @@
+/* Example of responsive grid layout */
+@media (max-width: 1200px) {
+    div {
+      grid-template-columns: repeat(3, minmax(300px, 1fr));
+    }
+  }
+  
+  @media (max-width: 800px) {
+    div {
+      grid-template-columns: repeat(2, minmax(300px, 1fr));
+    }
+  }
+  
+  @media (max-width: 600px) {
+    div {
+      grid-template-columns: repeat(1, minmax(300px, 1fr));
+    }
+  }
+  
