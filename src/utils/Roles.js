@@ -20,6 +20,9 @@ const rolesArray = ['Machine Learning Engineer',
 'Speech Recognition Engineer',
 'Conversational AI Developer',
 'DevOps Engineer',
+'VLSI Engineer',
+'PCB Design Engineer',
+'PCB Design verification Engineer',
 'Full Stack Developer',
 'UI/UX Designer',
 'Game Developer',
@@ -63,7 +66,8 @@ const rolesArray = ['Machine Learning Engineer',
 'Virtual Assistant Developer',
 'Educational Technology Specialist',
 'Fitness Technology Developer',
-'Space Exploration Scientist'];
+'Space Exploration Scientist',
+'Electronics Engineer'];
   
   export default rolesArray;
   

@@ -1,0 +1,57 @@
+.about-container {
+    padding: 50px;
+    text-align: center;
+  }
+  
+  .about-content {
+    max-width: 800px;
+    margin: 0 auto;
+  }
+  
+  .about-description {
+    font-size: 18px;
+    line-height: 1.6;
+    margin-bottom: 30px;
+  }
+  
+  .about-image-container {
+    display: flex;
+    justify-content: center;
+    margin-top: 30px;
+  }
+  
+  .icon {
+    margin: 30px;
+    text-align: center;
+    transition: transform 0.3s ease-in-out;
+  }
+  
+  .icon:hover {
+    transform: translateY(-5px);
+  }
+  
+  .text {
+    margin-top: 10px;
+    font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
+    font-weight: bold;
+  }
+  
+  .quote-container {
+    margin-top: 50px;
+    font-style: italic;
+  }
+  
+  .about-quote {
+    font-size: 18px;
+  }
+  
+  .title-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  .title-container h1 {
+    margin-right: 10px;
+  }
+  

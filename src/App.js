@@ -1,11 +1,12 @@
 import './App.css';
 
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
-import Feedback from './components/Feedback/Feedback';
+import Resources from './components/Resources/Resources';
 import Header from './components/Header/Header';
 import Interviewer from './components/Interviewer/Interviewer';
 import About from './components/About/About';
-import Welcome from './components/Welcome/Welcome';
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 function App() {
   return (
@@ -13,12 +14,12 @@ function App() {
     <Router>
       <Header />
         <Routes>
-          <Route path="/" element={<Welcome />} />
-          <Route path="/about" element={<About />} />
+          <Route path="/" element={<About />} />
           <Route path="/interviewer" element={<Interviewer />} />
-          <Route path="/feedback" element={<Feedback />} />
+          <Route path="/resources" element={<Resources />} />
         </Routes>
       </Router>
+      <ToastContainer/>
     </div>
   );
 }

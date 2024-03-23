@@ -7,6 +7,9 @@ import Grid from "@mui/material/Grid";
 import Snackbar from "@mui/material/Snackbar";
 import Alert from "@mui/material/Alert";
 import QuestionCard from "../Question/QuestionCard";
+import { toast } from "react-toastify"
+import ResultsCard from "../ResultsCard/ResultsCard";
+
 import {
   FormControl,
   Autocomplete,
@@ -16,27 +19,38 @@ import {
   MenuItem,
   Paper,
   CircularProgress,
-  Typography,
+  Typography
 } from "@mui/material";
 import rolesArray from "../../utils/Roles";
 import TechnicalSkillsArray from "../../utils/TechnicalSkills";
 import './Interviewer.css'
+
 const Interviewer = () => {
   const [loading, setLoading] = useState(false);
-  const [responseContent, setResponseContent] = useState({ messages: "" });
+  const [responseContent, setResponseContent] = useState({ response: "" });
   const [snackbarOpen, setSnackbarOpen] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState("");
   const mandatoryFields = ["role", "experience", "questions", "selectedSkills"];
   const [question, setQuestion] = useState([]);
   const [totalWeightage, setTotalWeightage] = useState(0);
+  const [questionScores, setQuestionScores] = useState([]);
+  const [showResults, setShowResults] = useState(false);
+  const [totalScore, setTotalScore] = useState(0);
+  const [prevValues, setPrevValues] = useState();
+  const [qId, setqID] = useState();
+
   let questionCardsRef = useRef(null);
+  let generateCardsRef = useRef(null);
 
   useEffect(() => {
-    if (responseContent && responseContent.messages.length) {
-      let parsedQuestions = parseData(
-        responseContent.messages.replaceAll("**", "")
-      );
-      setQuestion(parsedQuestions);
+    if (
+      responseContent &&
+      responseContent.response &&
+      Array.isArray(JSON.parse(responseContent.response)) &&
+      responseContent.response.length > 0
+    ) {
+      setQuestion(JSON.parse(responseContent.response));
+      setqID(responseContent.q_id);
     }
   }, [responseContent]);
 
@@ -49,11 +63,32 @@ const Interviewer = () => {
       behavior: "smooth",
     });
 
-    question.map((qn)=>{
-      weigh += parseInt(qn.weightage)
+    question.map((qn) => {
+      weigh += parseFloat(qn.weightage)
     })
     setTotalWeightage(weigh)
-  }, [question]);
+  }, [question, showResults]);
+
+  const updateQuestionScore = (index, score) => {
+    const existingIndex = questionScores.findIndex(item => item.index === index);
+    if (existingIndex !== -1) {
+      const updatedScores = [...questionScores];
+      updatedScores[existingIndex] = { index: index, score: score };
+      setQuestionScores(updatedScores);
+    } else {
+      setQuestionScores(prevScores => [...prevScores, { index: index, score: score }]);
+    }
+  };
+
+  const calculateTotalScore = () => {
+    const totalScore = questionScores.reduce((acc, qn) => acc + parseFloat(qn.score || 0), 0);
+    return totalScore;
+  };
+
+  const handleDisplayResults = () => {
+    setTotalScore(calculateTotalScore());
+    setShowResults(true);
+  };
 
   const handleSubmit = async (e) => {
     const areAllFieldsPresent = mandatoryFields.every((field) => {
@@ -78,12 +113,9 @@ const Interviewer = () => {
       e.preventDefault();
       setLoading(true);
       let exp;
-
       let resultSkills = "";
-      for (const skills of selectedSkills.splice(
-        0,
-        selectedSkills.length - 1
-      )) {
+      let spl = [...selectedSkills];
+      for (const skills of spl.splice(0, selectedSkills.length - 1)) {
         resultSkills += skills + "," + " ";
       }
 
@@ -94,63 +126,78 @@ const Interviewer = () => {
       } else {
         exp = parseInt(experience) + 1;
       }
-
-      let formatString = `
-      1. **Explain the bias-variance tradeoff in machine learning.** *(Weightage: 2)*
-         - **Answer**: The bias-variance tradeoff refers to the balance between underfitting (high bias) and overfitting (high variance) in a model. It's crucial to find the right level of complexity to achieve optimal performance.
-      
-      2. **What is regularization, and why is it important?** *(Weightage: 1)*
-         - **Answer**: Regularization techniques (e.g., L1, L2) prevent overfitting by adding penalty terms to the loss function. They help control model complexity.
-      
-      3. **Describe gradient descent and its variants.** *(Weightage: 2)*
-         - **Answer**: Gradient descent is an optimization algorithm used to minimize the loss function. Variants include stochastic gradient descent (SGD), mini-batch SGD, and Adam.
-      
-      4. **How do you handle missing data in a dataset?** *(Weightage: 1)*
-         - **Answer**: Options include imputation (mean, median, etc.), deletion, or using advanced techniques like regression-based imputation.
-      
-      5. **What's the difference between classification and regression?** *(Weightage: 1)*
-         - **Answer**: Classification predicts discrete labels (e.g., spam or not spam), while regression predicts continuous values (e.g., house prices).
-      
-      6. **Explain cross-validation and its benefits.** *(Weightage: 2)*
-         - **Answer**: Cross-validation assesses model performance by splitting data into multiple folds. It helps estimate generalization performance and prevents overfitting.`;
-
+      setPrevValues({
+        role: role,
+        experience: experience,
+        selectedSkills: selectedSkills,
+        questions: questions
+      })
       const requestData = {
         content:
-          `Hello Bing, act as an experienced interviewer and generate interview questions for a ${role} with ${exp} years of experience in ${
-            resultSkills + selectedSkills[selectedSkills.length - 1]
-          }. Provide ${
-            parseInt(questions) + 1
-          } questions with very simple oneliner answers and weightages for each question based on the complexity with an overall weightages of 10. Here's the format of response I need from you for better formatting and processing. Just stick only for the response format from the below example not the content and the count.` +
-          formatString,
+          `Hello GPT, act as an experienced interviewer and generate interview questions for a ${role} with ${exp} years of experience in ${resultSkills + selectedSkills[selectedSkills.length - 1]
+          }. Provide ${parseInt(questions) + 1
+          } questions with simple answers and weightages for each question in numbers based on the complexity.`,
+        role: role,
+        questions: parseInt(questions) + 1,
+        experience: exp,
+        skills: selectedSkills,
       };
 
       try {
-        const response = await fetch("http://localhost:10001/chat", {
+        setQuestion([]);
+        const responseData = await fetch("https://ai-interviewer-backend-ar0x.onrender.com/chat", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
           },
           body: JSON.stringify(requestData),
         });
-
-        if (response.ok) {
-          const responseData = await response.json();
-          console.log("responsedata", responseData);
-          setResponseContent(responseData);
-          if (responseData.messages.includes("points")) {
-            console.log("Re-rendering");
-            await handleSubmit();
-          }
+        if (responseData.ok) {
+          const res = await responseData.json();
+          toast.success(
+            <div>
+              <div>Generated {parseInt(questions) + 1} questions for a {role} with {exp} years of expertise.</div>
+            </div>,
+            {
+              position: "top-right",
+              autoClose: 5000,
+              hideProgressBar: false,
+              closeOnClick: true,
+              pauseOnHover: true,
+              draggable: true,
+              progress: undefined,
+              className: 'custom-toast',
+            }
+          );
+          setResponseContent(res);
           setRole("");
           setExperience("");
           setQuestions("");
+          setQuestionScores([]);
           setSelectedSkills([]);
         } else {
-          console.error("Error in response:", response.status);
+          console.error("Error in response:", responseData.status);
+          toast.warn(
+            <div>
+              <div>Error generating questions with your data.</div>
+              <div>Retry Again with new Inputs</div>
+            </div>,
+            {
+              position: "top-right",
+              autoClose: 5000,
+              hideProgressBar: false,
+              closeOnClick: true,
+              pauseOnHover: true,
+              draggable: true,
+              progress: undefined,
+              className: 'custom-toast',
+            }
+          );
           setResponseContent(null);
           setRole("");
           setExperience("");
           setQuestions("");
+          setQuestionScores([]);
           setSelectedSkills([]);
         }
       } catch (error) {
@@ -167,42 +214,16 @@ const Interviewer = () => {
   const [selectedSkills, setSelectedSkills] = React.useState([]);
   const [questions, setQuestions] = React.useState("");
 
+  const regenerateQuestions = (e) => {
+    setQuestion([]);
+    setRole(prevValues.role);
+    setExperience(prevValues.experience);
+    setSelectedSkills(prevValues.selectedSkills);
+    setQuestions(prevValues.questions);
+  }
+
   const handleChange = (event, value) => {
     setRole(value);
-  };
-
-  const parseData = (data) => {
-    let respArray = [];
-    data = data.replaceAll("*", "");
-    let questionsArray = data.split("\n");
-    console.log(questionsArray.slice(2, questionsArray.length - 1));
-    const filteredQuestionsArray = questionsArray
-      .slice(2, questionsArray.length - 1)
-      .filter((element) => element.trim() !== "");
-    console.log(filteredQuestionsArray);
-
-    if (filteredQuestionsArray.length % 2 !== 0) {
-      filteredQuestionsArray.pop();
-    }
-
-    let qnIndex = 0;
-    let ansIndex = 1;
-    while (qnIndex < filteredQuestionsArray.length) {
-      console.log(filteredQuestionsArray[qnIndex]);
-      respArray.push({
-        question: filteredQuestionsArray[qnIndex].split(". ")[1].split(" (")[0],
-        answer: filteredQuestionsArray[ansIndex].split("Answer: ")[1],
-        weightage: filteredQuestionsArray[qnIndex]
-          .replaceAll("(", "")
-          .replaceAll(")", "")
-          .split("Weightage: ")[1],
-      });
-      qnIndex += 2;
-      ansIndex += 2;
-    }
-
-    console.log(respArray);
-    return respArray;
   };
 
   const handleExperienceChange = (event) => {
@@ -212,6 +233,10 @@ const Interviewer = () => {
   const handleSkillsChange = (event, values) => {
     setSelectedSkills(values);
   };
+
+  const hideResults = (event) => {
+    setShowResults(false);
+  }
 
   const handleQuestionsChange = (event) => {
     setQuestions(event.target.value);
@@ -244,8 +269,9 @@ const Interviewer = () => {
       </Snackbar>
 
       <div
+        ref={generateCardsRef}
         style={{
-          display: "flex",
+          display: showResults ? "none" : "flex",
           alignItems: "center",
           justifyContent: "center",
           height: "80vh",
@@ -254,7 +280,7 @@ const Interviewer = () => {
       >
         <Box
           sx={{
-            background: "rgba(169, 169, 169, 0.2)",
+            background: "rgba(139, 176, 244, 0.2)",
             padding: "40px",
             borderRadius: "10px",
             display: "flex",
@@ -273,7 +299,7 @@ const Interviewer = () => {
                 left: 0,
                 width: "100%",
                 height: "100%",
-                background: "rgba(247, 220, 111, 0.6)",
+                background: "rgba(42,35,146,0.9)",
                 display: "flex",
                 flexDirection: "column",
                 alignItems: "center",
@@ -284,18 +310,18 @@ const Interviewer = () => {
             >
               <Typography
                 variant="h6"
-                style={{ marginBottom: "20px", color: "#333" }}
+                style={{ marginBottom: "20px", color: "white" }}
               >
                 Your Questions are getting Ready
               </Typography>
               <CircularProgress
                 sx={{
-                  color: "black",
+                  color: "white",
                 }}
               />
             </div>
           )}
-          <FormControl fullWidth>
+          <FormControl fullWidth disabled="showResults">
             <Grid container spacing={2}>
               <Grid item xs={12} sm={6}>
                 <Autocomplete
@@ -402,9 +428,9 @@ const Interviewer = () => {
                 marginTop: "40px",
                 width: "220px",
                 alignSelf: "center",
-                background: "#F7DC6F",
-                color: "black",
-                "&:hover": { color: "#F7DC6F", background: "black" },
+                background: "#2a2392",
+                color: "white",
+                ":hover": { color: '#0057c8', background: 'white', fontWeight:'bold' },
               }}
             >
               Generate Questions
@@ -412,6 +438,30 @@ const Interviewer = () => {
           </FormControl>
         </Box>
       </div>
+      {showResults && (
+        <div
+          style={{
+            position: 'fixed',
+            top: '50%',
+            left: '50%',
+            transform: 'translate(-50%, -50%)',
+            zIndex: 9999,
+          }}
+        >
+          <ResultsCard
+            className="result-card"
+            totalScore={totalScore}
+            totalWeightage={totalWeightage}
+            q_id={qId}
+            qn={question}
+            qnScores={questionScores}
+            role={prevValues.role}
+            experience={prevValues.experience}
+            skills={prevValues.selectedSkills}
+            onClose={() => setShowResults(false)}
+          />
+        </div>
+      )}
       <div
         ref={questionCardsRef}
         style={{
@@ -424,9 +474,44 @@ const Interviewer = () => {
         }}
       >
         {question.map((q, index) => (
-          <QuestionCard key={index} total={totalWeightage} {...q} style={{ width: "100%" }} />
+          <QuestionCard key={index} index={index} total={totalWeightage} {...q} disable={showResults} updateScore={(index, score) => updateQuestionScore(index, score)} style={{ width: "100%" }} />
         ))}
       </div>
+      {question.length ? <span style={{ display: "flex", flexDirection: "row" }}><Button
+        variant="contained"
+        color="primary"
+        onClick={handleDisplayResults}
+        disabled={!questionScores.every(score => score !== "") || showResults}
+        sx={{
+          marginTop: "40px",
+          width: "220px",
+          alignSelf: "center",
+          background: "#2a2392",
+          color: "white",
+          ":hover": { color: '#0057c8', background: 'white', fontWeight:'bold' },
+          marginBottom: "30px",
+        }}
+      >
+        Display Results
+      </Button>
+        <Button
+          variant="contained"
+          color="primary"
+          onClick={regenerateQuestions}
+          disabled={!questionScores.every(score => score !== "") || showResults}
+          sx={{
+            marginTop: "40px",
+            marginLeft: "25px",
+            width: "260px",
+            alignSelf: "center",
+            background: "#2a2392",
+            color: "white",
+            ":hover": { color: '#0057c8', background: 'white', fonWeight:'bold' },
+            marginBottom: "30px",
+          }}
+        >
+          Regenerate Questions
+        </Button></span> : <></>}
     </Container>
   );
 };
