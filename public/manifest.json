@@ -1,9 +1,9 @@
 {
-  "short_name": "React App",
-  "name": "Create React App Sample",
+  "short_name": "AI Interviewer",
+  "name": "Make your Interview Easy!",
   "icons": [
     {
-      "src": "favicon.ico",
+      "src": "https://img.icons8.com/nolan/64/bot.png",
       "sizes": "64x64 32x32 24x24 16x16",
       "type": "image/x-icon"
     },
