@@ -81,7 +81,7 @@ const ResultsCard = ({ totalScore, totalWeightage, onClose, q_id, qn, qnScores, 
             };
 
             setLoading(true);
-            const responseData = await postData("https://ai-interviewer-backend-ar0x.onrender.com", requestData);
+            const responseData = await postData("https://ai-interviewer-backend-ar0x.onrender.com/publish", requestData);
             if(responseData.success)
             {
                 displayToast('success',responseData.message,4000,"top-right");
@@ -222,7 +222,7 @@ const ResultsCard = ({ totalScore, totalWeightage, onClose, q_id, qn, qnScores, 
             setLoading(true);
 
             try {
-                const resp = await postData("https://ai-interviewer-backend-ar0x.onrender.com", payload);
+                const resp = await postData("https://ai-interviewer-backend-ar0x.onrender.com/aianalysis", payload);
 
                 setLoading(false);
 
