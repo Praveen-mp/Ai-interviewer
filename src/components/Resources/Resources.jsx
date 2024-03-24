@@ -5,14 +5,20 @@ import './Resources.css';
 const Resources = () => {
   const [questions, setQuestions] = useState([]);
   const [selectedQuestion, setSelectedQuestion] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [loadingMsg, setLoadingMsg] = useState("Loading Resources !!");
+  const [error, setError] = useState(null);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
         const response = await axios.get('https://ai-interviewer-backend-ar0x.onrender.com/resources');
         setQuestions(response.data);
+        setLoading(false); 
       } catch (error) {
         console.error('Error fetching data:', error);
+        setError(error); 
+        setLoading(false); 
       }
     };
 
@@ -26,6 +32,21 @@ const Resources = () => {
   const handleCloseModal = () => {
     setSelectedQuestion(null);
   };
+
+  if (loading) {
+    return  <div className='loading-overlay'>
+    <div className='loading-message'>{loadingMsg}</div>
+  </div>;
+  }
+
+  if (error) {
+    return <div className='error-overlay'>
+      <div className='error-message'>
+        Error fetching data. <button onClick={() => window.location.reload()}>Retry</button>
+      </div>
+    </div>;
+  }
+  
 
   return (
     <div className="resources-container">
