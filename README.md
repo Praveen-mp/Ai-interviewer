@@ -25,23 +25,19 @@ To get started with AI Interviewer, follow these steps:
 
 ## Usage
 
-1. Sign in to your AI Interviewer account.
+1. Open in AI Interviewer.
 2. Enter candidate details and specifications for generating interview questions.
 3. Review and customize the generated questions if necessary.
-4. Conduct the interview and record candidate responses.
+4. Conduct the interview and record scores based on candidate responses.
 5. Evaluate candidate performance using the scoring mechanism.
 6. Optionally, utilize AI analysis for further insights.
 7. Publish results based on your requirements.
 
 ## Contributors
 
-- John Doe (@johndoe)
-- Jane Smith (@janesmith)
+- Vimalraj (@Vimalraj-svr)
 
 ## Support
 
-For any inquiries or assistance, please contact support at support@ai-interviewer.com.
+For any inquiries or assistance, mail me at vimalrajsvr404@gmail.com.
 
-## License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
