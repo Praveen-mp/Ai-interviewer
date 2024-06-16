@@ -36,8 +36,9 @@ To get started with AI Interviewer, follow these steps:
 ## Contributors
 
 - Vimalraj (@Vimalraj-svr)
+- Praveen Kumar
 
 ## Support
 
-For any inquiries or assistance, mail me at vimalrajsvr404@gmail.com.
+For any inquiries or assistance, mail me at vimalrajsvr404@gmail.com, pravinkabi6@gmail.com.
 
