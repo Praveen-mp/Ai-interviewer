@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useCallback } from 'react';
 import {
     Card,
     CardContent,
@@ -7,21 +7,21 @@ import {
     Button
 } from '@mui/material';
 
-const AnalysisCard = ({ handleSaveDescription, handleCloseDescription, setDescription, rows }) => {
-
-    const saveDescription = () => {
+const AnalysisCard = React.memo(({ handleSaveDescription, handleCloseDescription, setDescription, rows }) => {
+    const saveDescription = useCallback(() => {
         handleSaveDescription();
-    };
+    }, [handleSaveDescription]);
 
-    const closeDescription = () => {
+    const closeDescription = useCallback(() => {
         handleCloseDescription();
-    };
-    const handleDescriptionChange = (event) => {
+    }, [handleCloseDescription]);
+
+    const handleDescriptionChange = useCallback((event) => {
         setDescription(event.target.value);
-    };
+    }, [setDescription]);
 
     return (
-        <Card className="analysis-card">
+        <Card sx={{ margin: 2 }}>
             <CardContent>
                 <Typography variant="h6" gutterBottom>
                     Job Description
@@ -39,14 +39,13 @@ const AnalysisCard = ({ handleSaveDescription, handleCloseDescription, setDescri
                         variant="contained"
                         color="primary"
                         onClick={saveDescription}
-                        sx={{ margin: '16px', backgroundColor: "#2a2392", ":hover": { color: '#0057c8', background: 'white', fontWeight:'bold' },
-                    }}
+                        sx={{ margin: 2, backgroundColor: "#2a2392", ":hover": { color: '#0057c8', background: 'white', fontWeight: 'bold' } }}
                     >
                         Save
                     </Button>
                     <Button
                         onClick={closeDescription}
-                        sx={{ margin: '16px', color: "#2a2392", ":hover": { fontWeight: "bold" } }}
+                        sx={{ margin: 2, color: "#2a2392", ":hover": { fontWeight: "bold" } }}
                     >
                         Close
                     </Button>
@@ -54,6 +53,6 @@ const AnalysisCard = ({ handleSaveDescription, handleCloseDescription, setDescri
             </CardContent>
         </Card>
     );
-};
+});
 
 export default AnalysisCard;

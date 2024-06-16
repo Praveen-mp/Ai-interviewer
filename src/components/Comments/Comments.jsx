@@ -7,33 +7,28 @@ import {
 } from '@mui/material';
 import ai from '../../static/images/assets/friends.png';
 
-const Comments = ({ handleCloseComments, comments }) => {
-
-    const closeComments = () => {
-        handleCloseComments();
-    };
-
+const Comments = React.memo(({ handleCloseComments, comments }) => {
     return (
-        <Card className="analysis-card">
+        <Card sx={{ margin: 2 }}>
             <CardContent>
-                <Typography variant="h6" style={{ margin: '10px', fontSize: '24px'  }} gutterBottom>
+                <Typography variant="h6" sx={{ margin: 1, fontSize: 24 }} gutterBottom>
                     <strong>AI's Analysis on the Candidate</strong>
-                    <img src={ai} alt="pass" style={{ width: '30px', height: '30px', marginLeft:'12px', marginTop:'8px'}} />
+                    <img src={ai} alt="AI analysis" style={{ width: 30, height: 30, marginLeft: 1.5, marginTop: 1 }} />
                 </Typography>
-                <Typography variant="body1" sx={{ margin: '10px', fontSize: '22px' }} paragraph>
+                <Typography variant="body1" sx={{ margin: 1, fontSize: 22 }} paragraph>
                     {comments}
                 </Typography>
             </CardContent>
             <div style={{ display: "flex", justifyContent: "flex-start" }}>
                 <Button
-                    onClick={closeComments}
-                    sx={{ margin: '20px', fontSize:'16px', color: "#2a2392", ":hover": { fontWeight: "bold" } }}
+                    onClick={handleCloseComments}
+                    sx={{ margin: 2, fontSize: 16, color: "#2a2392", ":hover": { fontWeight: "bold" } }}
                 >
                     Close
                 </Button>
             </div>
         </Card>
     );
-};
+});
 
 export default Comments;
